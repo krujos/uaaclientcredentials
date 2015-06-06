@@ -48,4 +48,11 @@ var _ = Describe("Uaaclientcredentials", func() {
 			Expect(token).NotTo(Equal(""))
 		})
 	})
+
+	Describe("Token Fetching", func() {
+
+		It("Should skip ssl validation", func() {
+			Fail("NYI")
+		})
+	})
 })
