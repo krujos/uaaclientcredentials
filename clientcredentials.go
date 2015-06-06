@@ -1,6 +1,9 @@
 package uaaclientcredentials
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
 
 //UaaClientCredentials provides a token for a given clientId and clientSecret.
 //The token is refreshed for you according to expires_in
@@ -21,6 +24,14 @@ func (creds *UaaClientCredentials) GetBearerToken() string {
 
 //New UaaClientCredentials factory
 func New(uaaURI *url.URL, clientID string, clientSecret string) (*UaaClientCredentials, error) {
+
+	if len(clientID) < 1 {
+		return nil, errors.New("clientID cannot be empty")
+	}
+
+	if len(clientSecret) < 1 {
+		return nil, errors.New("clientSecret cannot be empty")
+	}
 
 	creds := &UaaClientCredentials{
 		uaaURI:       uaaURI,

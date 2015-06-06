@@ -20,6 +20,19 @@ var _ = Describe("Uaaclientcredentials", func() {
 			uaaCC, _ := New(url, "client_id", "client_secret")
 			Expect(uaaCC).NotTo(BeNil())
 		})
+
+		It("should complain about an empty client id", func() {
+			uaaCC, err := New(url, "", "client_secret")
+			Expect(uaaCC).To(BeNil())
+			Expect(err).ToNot(BeNil())
+		})
+
+		It("should complain about an empty client secret", func() {
+			uaaCC, err := New(url, "client_id", "")
+			Expect(uaaCC).To(BeNil())
+			Expect(err).ToNot(BeNil())
+		})
+
 	})
 
 	Describe("Bearer Tokens", func() {
