@@ -1,6 +1,7 @@
 package uaaclientcredentials
 
 import (
+	"crypto/tls"
 	"errors"
 	"net/url"
 )
@@ -43,4 +44,11 @@ func New(uaaURI *url.URL, skipSSLValidation bool, clientID string,
 	}
 
 	return creds, nil
+}
+
+func (creds *UaaClientCredentials) getTLSConfig() *tls.Config {
+	if creds.skipSSLValidation {
+		return &tls.Config{InsecureSkipVerify: true}
+	}
+	return &tls.Config{}
 }

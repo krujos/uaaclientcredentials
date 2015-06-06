@@ -1,4 +1,4 @@
-package uaaclientcredentials_test
+package uaaclientcredentials
 
 import (
 	. "github.com/onsi/ginkgo"

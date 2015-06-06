@@ -1,9 +1,7 @@
-package uaaclientcredentials_test
+package uaaclientcredentials
 
 import (
 	"net/url"
-
-	. "github.com/krujos/uaaclientcredentials"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,6 +9,8 @@ import (
 
 var _ = Describe("Uaaclientcredentials", func() {
 	var url *url.URL
+	var uaaCC *UaaClientCredentials
+
 	BeforeEach(func() {
 		url, _ = url.Parse("https://uaa.at.your.place.com")
 	})
@@ -36,8 +36,6 @@ var _ = Describe("Uaaclientcredentials", func() {
 	})
 
 	Describe("Bearer Tokens", func() {
-		var uaaCC *UaaClientCredentials
-
 		BeforeEach(func() {
 			uaaCC, _ = New(url, false, "client_id", "client_secret")
 		})
@@ -52,7 +50,15 @@ var _ = Describe("Uaaclientcredentials", func() {
 	Describe("Token Fetching", func() {
 
 		It("Should skip ssl validation", func() {
-			Fail("NYI")
+			uaaCC, _ = New(url, true, "client_id", "client_secret")
+			config := uaaCC.getTLSConfig()
+			Expect(config.InsecureSkipVerify).To(BeTrue())
+		})
+
+		It("Should skip not ssl validation", func() {
+			uaaCC, _ = New(url, false, "client_id", "client_secret")
+			config := uaaCC.getTLSConfig()
+			Expect(config.InsecureSkipVerify).To(BeFalse())
 		})
 	})
 })
