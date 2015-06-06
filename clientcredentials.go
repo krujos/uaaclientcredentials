@@ -1,9 +1,11 @@
 package uaaclientcredentials
 
+import "net/url"
+
 //UaaClientCredentials provides a token for a given clientId and clientSecret.
 //The token is refreshed for you according to expires_in
 type UaaClientCredentials struct {
-	uaaURI             string
+	uaaURI             *url.URL
 	clientID           string
 	clientSecret       string
 	authorizationToken string
@@ -18,6 +20,13 @@ func (creds *UaaClientCredentials) GetBearerToken() string {
 }
 
 //New UaaClientCredentials factory
-func New(uaaURI string, clientID string, clientSecret string) (*UaaClientCredentials, error) {
-	return nil, nil
+func New(uaaURI *url.URL, clientID string, clientSecret string) (*UaaClientCredentials, error) {
+
+	creds := &UaaClientCredentials{
+		uaaURI:       uaaURI,
+		clientID:     clientID,
+		clientSecret: clientSecret,
+	}
+
+	return creds, nil
 }
