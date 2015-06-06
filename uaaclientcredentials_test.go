@@ -47,7 +47,7 @@ var _ = Describe("Uaaclientcredentials", func() {
 		})
 	})
 
-	Describe("Token Fetching", func() {
+	Describe("SSL Validation", func() {
 
 		It("Should skip ssl validation", func() {
 			uaaCC, _ = New(url, true, "client_id", "client_secret")
