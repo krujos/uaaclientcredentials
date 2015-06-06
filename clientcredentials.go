@@ -13,6 +13,7 @@ type UaaClientCredentials struct {
 	clientSecret       string
 	authorizationToken string
 	expiresAt          string
+	skipSSLValidation  bool
 }
 
 //GetBearerToken returns a currently valid bearer token to use against the
@@ -23,7 +24,8 @@ func (creds *UaaClientCredentials) GetBearerToken() string {
 }
 
 //New UaaClientCredentials factory
-func New(uaaURI *url.URL, clientID string, clientSecret string) (*UaaClientCredentials, error) {
+func New(uaaURI *url.URL, skipSSLValidation bool, clientID string,
+	clientSecret string) (*UaaClientCredentials, error) {
 
 	if len(clientID) < 1 {
 		return nil, errors.New("clientID cannot be empty")
@@ -34,9 +36,10 @@ func New(uaaURI *url.URL, clientID string, clientSecret string) (*UaaClientCrede
 	}
 
 	creds := &UaaClientCredentials{
-		uaaURI:       uaaURI,
-		clientID:     clientID,
-		clientSecret: clientSecret,
+		uaaURI:            uaaURI,
+		clientID:          clientID,
+		clientSecret:      clientSecret,
+		skipSSLValidation: skipSSLValidation,
 	}
 
 	return creds, nil

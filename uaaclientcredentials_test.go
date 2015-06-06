@@ -17,18 +17,18 @@ var _ = Describe("Uaaclientcredentials", func() {
 
 	Describe("Creationism", func() {
 		It("makes an initiliazed object", func() {
-			uaaCC, _ := New(url, "client_id", "client_secret")
+			uaaCC, _ := New(url, true, "client_id", "client_secret")
 			Expect(uaaCC).NotTo(BeNil())
 		})
 
 		It("should complain about an empty client id", func() {
-			uaaCC, err := New(url, "", "client_secret")
+			uaaCC, err := New(url, false, "", "client_secret")
 			Expect(uaaCC).To(BeNil())
 			Expect(err).ToNot(BeNil())
 		})
 
 		It("should complain about an empty client secret", func() {
-			uaaCC, err := New(url, "client_id", "")
+			uaaCC, err := New(url, false, "client_id", "")
 			Expect(uaaCC).To(BeNil())
 			Expect(err).ToNot(BeNil())
 		})
@@ -39,7 +39,7 @@ var _ = Describe("Uaaclientcredentials", func() {
 		var uaaCC *UaaClientCredentials
 
 		BeforeEach(func() {
-			uaaCC, _ = New(url, "client_id", "client_secret")
+			uaaCC, _ = New(url, false, "client_id", "client_secret")
 		})
 
 		It("should return a properly formatted bearer token", func() {
