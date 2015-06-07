@@ -3,7 +3,7 @@ This package provides a go implementation for the client credentials flow for Cl
 
 ##Usage
 
-```
+```go
 import (
 	"github.com/krujos/uaaclientcredentials"
 )
