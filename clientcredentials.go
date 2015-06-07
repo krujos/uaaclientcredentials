@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -90,7 +89,6 @@ func (creds *UaaClientCredentials) getJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	log.Println("Server responded with status code", resp.StatusCode)
 	if resp.StatusCode != 200 {
 		return nil, errors.New("UAA responded with bad status (" +
 			strconv.Itoa(resp.StatusCode) + ")")

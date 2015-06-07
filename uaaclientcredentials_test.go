@@ -3,6 +3,7 @@ package uaaclientcredentials
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -92,6 +93,13 @@ var _ = Describe("Uaaclientcredentials", func() {
 				Expect(results).ToNot(BeNil())
 				Expect(err).To(BeNil())
 			})
+
+			It("should marshal UAA responses into creds", func() {
+				uaaCC.getToken()
+				Ω(server.ReceivedRequests()).Should(HaveLen(1))
+				Expect(uaaCC.accessToken).To(Equal("test_token"))
+				Expect(uaaCC.expiresAt.Unix()).To(BeNumerically(">", time.Now().Unix()))
+			})
 		})
 
 		Context("when the request is unauthorized", func() {
@@ -106,15 +114,8 @@ var _ = Describe("Uaaclientcredentials", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(results).To(BeNil())
 			})
-
 		})
 
-		It("should ask for client credentials", func() {
-		})
-
-		It("should use the client id & secret for basic auth", func() {
-
-		})
 	})
 
 	Describe("Bearer Tokens", func() {
