@@ -36,6 +36,16 @@ var _ = Describe("Uaaclientcredentials", func() {
 			Expect(err).ToNot(BeNil())
 		})
 
+		Describe("token preconditions", func() {
+			BeforeEach(func() {
+				uaaCC, _ = New(url, true, "client_id", "client_secret")
+			})
+
+			It("Should not have a valid token yet", func() {
+				Expect(uaaCC.expiresAt.Unix()).To(BeNumerically("<", time.Now().Unix()))
+			})
+
+		})
 	})
 
 	Describe("SSL Validation", func() {

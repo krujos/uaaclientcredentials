@@ -60,11 +60,16 @@ func New(uaaURI *url.URL, skipSSLValidation bool, clientID string,
 
 	uri, _ := url.Parse(uaaURI.String() + "/oauth/token?grant_type=client_credentials")
 
+	//Force the first call bo bearer token to get a new one.
+	duration, _ := time.ParseDuration("-5m")
+	expiresAt := time.Now().Add(duration)
+
 	creds := &UaaClientCredentials{
 		uaaURI:            uri,
 		clientID:          clientID,
 		clientSecret:      clientSecret,
 		skipSSLValidation: skipSSLValidation,
+		expiresAt:         expiresAt,
 	}
 
 	return creds, nil
