@@ -100,6 +100,20 @@ var _ = Describe("Uaaclientcredentials", func() {
 				Expect(uaaCC.accessToken).To(Equal("test_token"))
 				Expect(uaaCC.expiresAt.Unix()).To(BeNumerically(">", time.Now().Unix()))
 			})
+
+			Describe("when the token is expired", func() {
+				BeforeEach(func() {
+					duration, _ := time.ParseDuration("-5m")
+					uaaCC.expiresAt = time.Now().Add(duration)
+					Expect(uaaCC.expiresAt.Unix()).To(BeNumerically("<", time.Now().Unix()))
+				})
+
+				It("Should refresh my token", func() {
+					token, _ := uaaCC.GetBearerToken()
+					Expect(token).NotTo(BeNil())
+					Expect(uaaCC.expiresAt.Unix()).To(BeNumerically(">", time.Now().Unix()))
+				})
+			})
 		})
 
 		Context("when the request is unauthorized", func() {
@@ -114,6 +128,13 @@ var _ = Describe("Uaaclientcredentials", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(results).To(BeNil())
 			})
+
+			It("Should give me an error when refresh fails", func() {
+				token, err := uaaCC.GetBearerToken()
+				Ω(server.ReceivedRequests()).Should(HaveLen(1))
+				Expect(err).ToNot(BeNil())
+				Expect(token).To(Equal(""))
+			})
 		})
 
 	})
@@ -121,11 +142,13 @@ var _ = Describe("Uaaclientcredentials", func() {
 	Describe("Bearer Tokens", func() {
 		BeforeEach(func() {
 			uaaCC, _ = New(url, true, "client_id", "client_secret")
+			duration, _ := time.ParseDuration("1h")
+			uaaCC.expiresAt = time.Now().Add(duration)
 			uaaCC.accessToken = "test_token"
 		})
 
 		It("should return a properly formatted bearer token", func() {
-			token := uaaCC.GetBearerToken()
+			token, _ := uaaCC.GetBearerToken()
 			Expect(token).To(Equal("bearer test_token"))
 		})
 	})

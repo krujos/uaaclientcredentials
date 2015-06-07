@@ -35,9 +35,15 @@ type UAATokenResponse struct {
 
 //GetBearerToken returns a currently valid bearer token to use against the
 //CF API. You should not cache the token as the library will handle updating
-//it if it's expired.
-func (creds *UaaClientCredentials) GetBearerToken() string {
-	return "bearer " + creds.accessToken
+//it if it's expired. This API will return an empty string and an error if
+//there was a problem aquiring a token from UAA
+func (creds *UaaClientCredentials) GetBearerToken() (string, error) {
+	if time.Now().After(creds.expiresAt) {
+		if err := creds.getToken(); nil != err {
+			return "", err
+		}
+	}
+	return "bearer " + creds.accessToken, nil
 }
 
 //New UaaClientCredentials factory
@@ -111,7 +117,8 @@ func (creds *UaaClientCredentials) getToken() error {
 	}
 
 	creds.accessToken = token.AccessToken
-	duration, _ := time.ParseDuration(strconv.Itoa(token.ExpiresIn) + "s")
+	//Give ourselves 1 min of buffer time for clock skews
+	duration, _ := time.ParseDuration(strconv.Itoa(token.ExpiresIn-60) + "m")
 	creds.expiresAt = time.Now().Add(duration)
 	return nil
 
