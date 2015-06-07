@@ -53,8 +53,10 @@ func New(uaaURI *url.URL, skipSSLValidation bool, clientID string,
 		return nil, errors.New("clientSecret cannot be empty")
 	}
 
+	uri, _ := url.Parse(uaaURI.String() + "/oauth/token?grant_type=client_credentials")
+
 	creds := &UaaClientCredentials{
-		uaaURI:            uaaURI,
+		uaaURI:            uri,
 		clientID:          clientID,
 		clientSecret:      clientSecret,
 		skipSSLValidation: skipSSLValidation,
@@ -80,9 +82,7 @@ func (creds *UaaClientCredentials) getClient() *http.Client {
 
 func (creds *UaaClientCredentials) getJSON() ([]byte, error) {
 	client := creds.getClient()
-	url := creds.uaaURI.String() + "/oauth/token?grant_type=client_credentials"
-
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", creds.uaaURI.String(), nil)
 	req.SetBasicAuth(creds.clientID, creds.clientSecret)
 
 	resp, err := client.Do(req)
