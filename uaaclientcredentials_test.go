@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 )
 
 var _ = Describe("Uaaclientcredentials", func() {
@@ -35,18 +36,6 @@ var _ = Describe("Uaaclientcredentials", func() {
 
 	})
 
-	Describe("Bearer Tokens", func() {
-		BeforeEach(func() {
-			uaaCC, _ = New(url, false, "client_id", "client_secret")
-		})
-
-		It("should return a properly formatted bearer token", func() {
-			token := uaaCC.GetBearerToken()
-			Expect(token).NotTo(BeNil())
-			Expect(token).NotTo(Equal(""))
-		})
-	})
-
 	Describe("SSL Validation", func() {
 
 		It("Should skip ssl validation", func() {
@@ -59,6 +48,49 @@ var _ = Describe("Uaaclientcredentials", func() {
 			uaaCC, _ = New(url, false, "client_id", "client_secret")
 			config := uaaCC.getTLSConfig()
 			Expect(config.InsecureSkipVerify).To(BeFalse())
+		})
+	})
+
+	Describe("Token Acquisition", func() {
+
+		var server *ghttp.Server
+		BeforeEach(func() {
+			server = ghttp.NewTLSServer()
+			url, _ = url.Parse(server.URL())
+			server.AppendHandlers(
+				ghttp.VerifyRequest("GET", "/aouth/token"),
+				ghttp.VerifyBasicAuth("client_id", "client_secret"),
+			)
+			uaaCC, _ = New(url, false, "client_id", "client_secret")
+		})
+
+		AfterEach(func() {
+			server.Close()
+		})
+
+		It("should fetch a credential", func() {
+			uaaCC.getToken()
+			Ω(server.ReceivedRequests()).Should(HaveLen(1))
+			Expect(uaaCC.authorizationToken).NotTo(BeNil())
+		})
+
+		It("should ask for client credentials", func() {
+		})
+
+		It("should use the client id & secret for basic auth", func() {
+
+		})
+	})
+
+	Describe("Bearer Tokens", func() {
+		BeforeEach(func() {
+			uaaCC, _ = New(url, true, "client_id", "client_secret")
+			uaaCC.authorizationToken = "test_token"
+		})
+
+		It("should return a properly formatted bearer token", func() {
+			token := uaaCC.GetBearerToken()
+			Expect(token).To(Equal("bearer test_token"))
 		})
 	})
 })
