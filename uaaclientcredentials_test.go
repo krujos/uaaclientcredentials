@@ -1,6 +1,7 @@
 package uaaclientcredentials
 
 import (
+	"net/http"
 	"net/url"
 
 	. "github.com/onsi/ginkgo"
@@ -52,26 +53,60 @@ var _ = Describe("Uaaclientcredentials", func() {
 	})
 
 	Describe("Token Acquisition", func() {
-
 		var server *ghttp.Server
+		var statusCode int
+		var responseBody UAATokenResponse
+
 		BeforeEach(func() {
 			server = ghttp.NewTLSServer()
 			url, _ = url.Parse(server.URL())
 			server.AppendHandlers(
-				ghttp.VerifyRequest("GET", "/aouth/token"),
-				ghttp.VerifyBasicAuth("client_id", "client_secret"),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/oauth/token", "grant_type=client_credentials"),
+					ghttp.VerifyBasicAuth("client_id", "client_secret"),
+					ghttp.RespondWithJSONEncodedPtr(&statusCode, &responseBody),
+				),
 			)
-			uaaCC, _ = New(url, false, "client_id", "client_secret")
+			uaaCC, _ = New(url, true, "client_id", "client_secret")
 		})
 
 		AfterEach(func() {
 			server.Close()
 		})
 
-		It("should fetch a credential", func() {
-			uaaCC.getToken()
-			Ω(server.ReceivedRequests()).Should(HaveLen(1))
-			Expect(uaaCC.authorizationToken).NotTo(BeNil())
+		Context("when the request is all good", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusOK
+				responseBody = UAATokenResponse{
+					AccessToken: "test_token",
+					TokenType:   "bearer",
+					ExpiresIn:   43199,
+					Scope:       "cloud_controller.admin",
+					Jti:         "145450ab-c78f-46dd-90f4-51a40c2bc2c0",
+				}
+			})
+
+			It("should fetch a credential", func() {
+				results, err := uaaCC.getJSON()
+				Ω(server.ReceivedRequests()).Should(HaveLen(1))
+				Expect(results).ToNot(BeNil())
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("when the request is unauthorized", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusUnauthorized
+				responseBody = UAATokenResponse{}
+			})
+
+			It("should return an error if the status code is not 200", func() {
+				results, err := uaaCC.getJSON()
+				Ω(server.ReceivedRequests()).Should(HaveLen(1))
+				Expect(err).ToNot(BeNil())
+				Expect(results).To(BeNil())
+			})
+
 		})
 
 		It("should ask for client credentials", func() {
@@ -85,7 +120,7 @@ var _ = Describe("Uaaclientcredentials", func() {
 	Describe("Bearer Tokens", func() {
 		BeforeEach(func() {
 			uaaCC, _ = New(url, true, "client_id", "client_secret")
-			uaaCC.authorizationToken = "test_token"
+			uaaCC.accessToken = "test_token"
 		})
 
 		It("should return a properly formatted bearer token", func() {
