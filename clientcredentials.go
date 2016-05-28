@@ -33,6 +33,11 @@ type UAATokenResponse struct {
 	TokenType   string `json:"token_type"`
 }
 
+//ClientCredentials interface type for UaaClientCredentials
+type ClientCredentials interface {
+	GetBearerToken() (string, error)
+}
+
 //GetBearerToken returns a currently valid bearer token to use against the
 //CF API. You should not cache the token as the library will handle updating
 //it if it's expired. This API will return an empty string and an error if
